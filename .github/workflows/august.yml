@@ -1,4 +1,4 @@
-name: ${{github.actor}} Testing
+name: Testing
 
 on:
   push:
