@@ -43,10 +43,11 @@ jobs:
       - name: Create Message
         id: createMessage
         run: |
-          if[ ${{ github.event_name }} == 'workflow_dispatch']; then
-            echo '${{ github.actor}} har startat ${{ github.workflow_name}} manuellt' >> $GITHUB_OUTPUT
+          if[ ${{ github.event_name }} == 'workflow_dispatch'];
+          then 
+            echo '${{ github.actor}} har startat ${{ github.workflow_name}} manuellt' >> $GITHUB_OUTPUT;
           else
-            echo 'Det är en push' >> $GITHUB_OUTPUT
+            echo 'En push har gjorts till ${{ github.branch }} i repo ${{ github.repository }}' >> $GITHUB_OUTPUT;
           fi
       - name: Send to Discord
         env:
