@@ -26,7 +26,7 @@ jobs:
       - name: 🥷 Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          version: ${{matrix.version}}
+          dotnet-version: ${{matrix.version}}
 
       - name: 🛠️ Build
         continue-on-error: false
@@ -43,4 +43,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ""
+            args: "Du ser det här meddelandet för att någon pushar saker helt i onödan"
