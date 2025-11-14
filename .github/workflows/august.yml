@@ -37,16 +37,20 @@ jobs:
 
   send-to-discord:
     runs-on: ubuntu-latest
+    env:
+      message: ${{steps.createMessage.outputs}}
     steps:
+      - name: Create Message
+        id: createMessage
+        run: |
+          if[ ${{ github.event_name }} == 'workflow_dispatch']; then
+              echo '${{ github.actor}} har startat ${{ github.workflow_name}} manuellt' >> $GITHUB_OUTPUT
+            else
+              echo 'Det är en push' >> $GITHUB_OUTPUT
+            fi
       - name: Send to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          MESSAGE: |
-            if[ ${{ github.event_name }} == 'workflow_dispatch']; then:
-              'har startats manuellt'
-            else:
-              'Det är en push'
-            fi
         uses: Ilshidur/action-discord@master
         with:
-            args: ${{env.MESSAGE}}
+            args: ${{env.message}}
