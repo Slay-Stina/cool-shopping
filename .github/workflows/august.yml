@@ -41,6 +41,12 @@ jobs:
       - name: Send to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          MESSAGE: |
+            if[ ${{ github.event_name }} == 'workflow_dispatch']; then:
+              'har startats manuellt'
+            else:
+              'Det är en push'
+            fi
         uses: Ilshidur/action-discord@master
         with:
-            args: ""
+            args: ${{env.MESSAGE}}
