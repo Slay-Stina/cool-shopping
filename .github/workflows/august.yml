@@ -43,4 +43,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-            args: "Du ser det här meddelandet för att någon pushar saker helt i onödan"
+            args: ""
