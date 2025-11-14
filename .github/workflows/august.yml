@@ -1,7 +1,7 @@
 name: ${{github.actor}} Testing
 
 on:
-  push: ${{main}}
+  push:
   workflow_dispatch:
     inputs:
       why-run:
@@ -11,17 +11,9 @@ on:
         type: string
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        version: [8.0, 7.0, 6.0]
-        
+  send-to-discord:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-      
       - name: Send to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -34,6 +26,17 @@ jobs:
             else
               "En push har gjorts till ${{github.repository}} av ${{github.actor}}"
             fi
+            
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        version: [8.0, 7.0, 6.0]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5      
             
       - name: 🥷 Setup .NET
         uses: actions/setup-dotnet@v5
