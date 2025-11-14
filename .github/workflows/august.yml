@@ -37,7 +37,7 @@ jobs:
 
   send-to-discord:
     runs-on: ubuntu-latest
-    env:
+    outputs:
       message: ${{steps.createMessage.outputs}}
     steps:
       - name: Create Message
@@ -53,4 +53,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ${{env.message}}
+            args: ${{outputs.message}}
