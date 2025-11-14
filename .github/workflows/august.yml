@@ -10,29 +10,14 @@ on:
         required: false
         type: string
 
-jobs:
-  send-to-discord:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send to Discord
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: |
-            if[ ${{ github.event_name }} == 'workflow_dispatch' ]; then
-              "⚠️ ${{ github.actor}} har kört igång ett workflow manuellt!"
-              "Anledning: ${{inputs.why-run}}"
-            else
-              "En push har gjorts till ${{github.repository}} av ${{github.actor}}"
-            fi
-            
+jobs:            
   build:
+    continue-on-error: false
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        version: [9.0]
+        version: [9.0, 8.0]
         
     steps:
       - name: Checkout code
@@ -49,3 +34,13 @@ jobs:
         
       - name: ⚗️Test
         run: dotnet test
+
+  send-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+            args: ""
