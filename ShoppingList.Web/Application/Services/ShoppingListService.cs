@@ -1,4 +1,6 @@
-﻿using ShoppingList.Application.Interfaces;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using ShoppingList.Application.Interfaces;
 using ShoppingList.Domain.Models;
 
 namespace ShoppingList.Application.Services;
@@ -12,27 +14,39 @@ public class ShoppingListService : IShoppingListService
     {
         // Initialize with demo data for UI demonstration
         // TODO: Students can remove or comment this out when running unit tests
-        _items = GenerateDemoItems();
-        _nextIndex = 4; // We have 4 demo items initialized
+        _items = [];
+        _nextIndex = 0; // We have 4 demo items initialized
     }
 
     public IReadOnlyList<ShoppingItem> GetAll()
     {
-        // TODO: Students - Return all items from the array (up to _nextIndex)
-        return [];
+        return _items;
     }
 
     public ShoppingItem? GetById(string id)
     {
-        // TODO: Students - Find and return the item with the matching id
-        return null;
+        foreach (var item in _items)
+        {
+            if (item.Id == id)
+                return item;
+        }
+
+        throw new NullReferenceException("No item found");
     }
 
     public ShoppingItem? Add(string name, int quantity, string? notes)
     {
-        // TODO: Students - Implement this method
-        // Return the created item
-        return null;
+        var newItem = new ShoppingItem
+        {
+            Name = name,
+            Quantity = quantity,
+            Notes = notes,
+        };
+        Array.Resize(ref _items, _nextIndex + 1);
+        _items[_nextIndex] = newItem;
+        _nextIndex++;
+
+        return newItem;
     }
 
     public ShoppingItem? Update(string id, string name, int quantity, string? notes)
@@ -44,16 +58,38 @@ public class ShoppingListService : IShoppingListService
 
     public bool Delete(string id)
     {
-        // TODO: Students - Implement this method
-        // Return true if deleted, false if not found
-        return false;
+        bool isDeleted = false;
+        for (int i = 0; i < _items.Length; i++)
+        {
+            if (_items[i] != null && _items[i].Id == id)
+            {
+                _items[i] = null;
+                isDeleted = true;
+            }
+            if (_items[i] == null && _items[i] != _items.Last())
+            {
+                _items[i] = _items[i + 1];
+                _items[i + 1] = null;
+            }
+        }
+        return isDeleted ? isDeleted : throw new NullReferenceException("Item not found");
     }
 
     public IReadOnlyList<ShoppingItem> Search(string query)
     {
-        // TODO: Students - Implement this method
-        // Return the filtered items
-        return [];
+        List<ShoppingItem> results = [];
+
+        foreach (var item in _items)
+        {
+            if (
+                item.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                || item.Notes.Contains(query, StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                results.Add(item);
+            }
+        }
+        return results;
     }
 
     public int ClearPurchased()
@@ -75,43 +111,5 @@ public class ShoppingListService : IShoppingListService
         // TODO: Students - Implement this method
         // Return true if successful, false otherwise
         return false;
-    }
-
-    private ShoppingItem[] GenerateDemoItems()
-    {
-        var items = new ShoppingItem[5];
-        items[0] = new ShoppingItem
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "Dishwasher tablets",
-            Quantity = 1,
-            Notes = "80st/pack - Rea",
-            IsPurchased = false
-        };
-        items[1] = new ShoppingItem
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "Ground meat",
-            Quantity = 1,
-            Notes = "2kg - origin Sweden",
-            IsPurchased = false
-        };
-        items[2] = new ShoppingItem
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "Apples",
-            Quantity = 10,
-            Notes = "Pink Lady",
-            IsPurchased = false
-        };
-        items[3] = new ShoppingItem
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "Toothpaste",
-            Quantity = 1,
-            Notes = "Colgate",
-            IsPurchased = false
-        };
-        return items;
     }
 }

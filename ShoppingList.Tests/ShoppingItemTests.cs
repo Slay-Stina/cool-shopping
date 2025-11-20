@@ -1,3 +1,4 @@
+using ShoppingList.Application.Services;
 using ShoppingList.Domain.Models;
 using Xunit;
 
@@ -271,4 +272,112 @@ public class ShoppingItemTests
     }
 
     #endregion
+
+    [Fact]
+    public void Add_ShouldReturnItem()
+    {
+        var expected = new ShoppingItem
+        {
+            Name = "itemTest",
+            Quantity = 1,
+            Notes = "test item",
+        };
+
+        var sut = new ShoppingListService();
+        var actual = sut.Add(expected.Name, expected.Quantity, expected.Notes);
+
+        Assert.NotEmpty(actual.Id);
+
+        Assert.Equal(expected.Name, actual.Name);
+        Assert.Equal(expected.Quantity, actual.Quantity);
+        Assert.Equal(expected.Notes, actual.Notes);
+    }
+
+    [Fact]
+    public void Add_ShouldThrowIfNameIsEmpty()
+    {
+        var sut = new ShoppingListService();
+
+        Assert.Throws<ArgumentException>(() => sut.Add("", 1, "desc"));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(5)]
+    [InlineData(20)]
+    public void GetAll_ShouldReturnItemsArray(int expected)
+    {
+        var sut = new ShoppingListService();
+
+        for (int i = 0; i < expected; i++)
+        {
+            sut.Add("test", 1, "desc");
+        }
+
+        var actual = sut.GetAll();
+
+        Assert.Equal(expected, actual.Count);
+    }
+
+    [Fact]
+    public void GetById_ShouldReturnCorrectItem()
+    {
+        var sut = new ShoppingListService();
+
+        var expected = sut.Add("test", 1, "note");
+
+        var actual = sut.GetById(expected!.Id);
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void GetById_ThrowsIfIdIsNotFound()
+    {
+        var sut = new ShoppingListService();
+
+        Assert.Throws<NullReferenceException>(() => sut.GetById(Guid.NewGuid().ToString()));
+    }
+
+    [Fact]
+    public void Delete_ShouldReturnTrueIfDeleted()
+    {
+        var sut = new ShoppingListService();
+
+        var item = sut.Add("test", 1, "note");
+
+        var expected = sut.Delete(item.Id);
+
+        Assert.True(expected);
+    }
+
+    [Fact]
+    public void Delete_ShouldReturnExceptionIfNotFound()
+    {
+        var sut = new ShoppingListService();
+
+        Assert.Throws<NullReferenceException>(() => sut.GetById("InvallidId"));
+    }
+
+    [Theory]
+    [InlineData("a", 5)]
+    [InlineData("ab", 4)]
+    [InlineData("abc", 3)]
+    [InlineData("abcd", 2)]
+    [InlineData("abcde", 1)]
+    [InlineData("bröd", 5)]
+    public void Search_ShouldReturnMatchingItems(string query, int expectedMatches)
+    {
+        var sut = new ShoppingListService();
+
+        sut.Add("Bröd", 1, "a");
+        sut.Add("Bröd", 1, "ab");
+        sut.Add("Bröd", 1, "abc");
+        sut.Add("Bröd", 1, "abcd");
+        sut.Add("Bröd", 1, "abcde");
+
+        var actual = sut.Search(query);
+
+        Assert.Equal(expectedMatches, actual.Count());
+    }
 }
