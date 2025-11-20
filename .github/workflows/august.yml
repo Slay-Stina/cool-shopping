@@ -1,0 +1,59 @@
+name: Testing
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      why-run:
+        description: 'Varför vill du köra workflowet?'
+        default: 'Testing'
+        required: false
+        type: string
+
+jobs:            
+  build:
+    continue-on-error: false
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        version: [9.0, 8.0]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5      
+            
+      - name: 🥷 Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{matrix.version}}
+
+      - name: 🛠️ Build
+        continue-on-error: false
+        run: dotnet build
+        
+      - name: ⚗️Test
+        run: dotnet test
+
+  send-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Message
+        id: createMessage
+        run: |        
+          MESSAGE=""
+          
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then  
+            MESSAGE="${{ github.actor}} har startat ${{ github.workflow }} manuellt"
+          else
+            MESSAGE="En push har gjorts till ${{ github.ref_name }} i repo ${{ github.repository }}"
+          fi
+          
+          echo "discord_message=$MESSAGE" >> $GITHUB_OUTPUT
+          
+      - name: Send to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: ${{ steps.createMessage.outputs.discord_message }}
